@@ -61,6 +61,10 @@ export default function App() {
   const [showModal, setShowModal] = useState(false);
   const [selectedSize, setSelectedSize] = useState("M");
   const [cart, setCart] = useState(0);
+  const [showLogin, setShowLogin] = useState(false);
+  const [showRegister, setShowRegister] = useState(false);
+  const [showCart, setShowCart] = useState(false);
+  const [cartItems, setCartItems] = useState<Array<{id: number, name: string, size: string, price: string, image: string}>>([]);
 
   useEffect(() => {
     if (!isAutoplay) return;
@@ -98,6 +102,18 @@ export default function App() {
   const handleSizeClick = (size: string) => {
     setSelectedSize(size);
     setIsAutoplay(false);
+  };
+
+  const handleAddToCart = () => {
+    setCartItems([...cartItems, {
+      id: current.id,
+      name: current.name,
+      size: selectedSize,
+      price: current.price,
+      image: current.image
+    }]);
+    setCart(cart + 1);
+    setShowModal(false);
   };
 
   const current = products[currentIndex];
@@ -175,6 +191,7 @@ export default function App() {
         <div className="flex items-center gap-6">
           {/* Cart */}
           <motion.button
+            onClick={() => setShowCart(true)}
             className="relative group"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -193,6 +210,7 @@ export default function App() {
 
           {/* Login */}
           <motion.button
+            onClick={() => setShowLogin(true)}
             className="flex items-center gap-2 border border-[#262626] px-4 py-2 hover:border-[#00d9ff] hover:text-[#00d9ff] transition-all"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -203,6 +221,7 @@ export default function App() {
 
           {/* Register */}
           <motion.button
+            onClick={() => setShowRegister(true)}
             className="flex items-center gap-2 bg-[#00d9ff] text-black px-4 py-2 hover:bg-white transition-colors"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -226,7 +245,7 @@ export default function App() {
       </motion.header>
 
       {/* Main Content */}
-      <div className="h-full flex items-center justify-center">
+      <div className="h-full flex items-center justify-center px-4 md:px-0">
         <AnimatePresence mode="wait" custom={direction}>
           <motion.div
             key={currentIndex}
@@ -241,7 +260,7 @@ export default function App() {
               scale: { duration: 0.4 },
               rotateY: { duration: 0.6 },
             }}
-            className="absolute grid md:grid-cols-2 gap-16 items-center px-8 md:px-20 max-w-[1400px]"
+            className="absolute grid md:grid-cols-2 gap-8 md:gap-16 items-center px-4 md:px-12 lg:px-20 max-w-[1400px] w-full"
             style={{ perspective: "1000px" }}
           >
             {/* Product Image */}
@@ -396,11 +415,11 @@ export default function App() {
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 1.2 }}
         onClick={prevSlide}
-        className="hidden md:flex fixed left-4 lg:left-8 top-1/2 -translate-y-1/2 z-40 w-14 h-14 lg:w-16 lg:h-16 border-2 border-[#262626] hover:border-[#00d9ff] items-center justify-center group transition-all bg-black/80 backdrop-blur-sm"
+        className="hidden lg:flex fixed left-2 xl:left-4 top-1/2 -translate-y-1/2 z-40 w-12 h-12 xl:w-14 xl:h-14 border-2 border-[#262626] hover:border-[#00d9ff] items-center justify-center group transition-all bg-black/90 backdrop-blur-sm"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
       >
-        <ChevronLeft className="w-5 h-5 lg:w-6 lg:h-6 group-hover:text-[#00d9ff] transition-colors" />
+        <ChevronLeft className="w-5 h-5 xl:w-6 xl:h-6 group-hover:text-[#00d9ff] transition-colors" />
       </motion.button>
 
       <motion.button
@@ -408,11 +427,11 @@ export default function App() {
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 1.2 }}
         onClick={nextSlide}
-        className="hidden md:flex fixed right-4 lg:right-8 top-1/2 -translate-y-1/2 z-40 w-14 h-14 lg:w-16 lg:h-16 border-2 border-[#262626] hover:border-[#00d9ff] items-center justify-center group transition-all bg-black/80 backdrop-blur-sm"
+        className="hidden lg:flex fixed right-2 xl:right-4 top-1/2 -translate-y-1/2 z-40 w-12 h-12 xl:w-14 xl:h-14 border-2 border-[#262626] hover:border-[#00d9ff] items-center justify-center group transition-all bg-black/90 backdrop-blur-sm"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
       >
-        <ChevronRight className="w-5 h-5 lg:w-6 lg:h-6 group-hover:text-[#00d9ff] transition-colors" />
+        <ChevronRight className="w-5 h-5 xl:w-6 xl:h-6 group-hover:text-[#00d9ff] transition-colors" />
       </motion.button>
 
       {/* Product Navigation Sidebar */}
@@ -494,7 +513,309 @@ export default function App() {
         className="fixed bottom-1/4 right-1/3 w-2 h-2 bg-[#00d9ff] blur-sm"
       />
 
-      {/* Modal Window */}
+      {/* Login Modal */}
+      <AnimatePresence>
+        {showLogin && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowLogin(false)}
+            className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex items-center justify-center p-8"
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0, y: 50 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.8, opacity: 0, y: 50 }}
+              transition={{ type: "spring", duration: 0.5 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-black border-2 border-[#00d9ff] max-w-md w-full p-8 relative"
+            >
+              <motion.button
+                onClick={() => setShowLogin(false)}
+                className="absolute -top-4 -right-4 w-12 h-12 bg-[#00d9ff] text-black flex items-center justify-center hover:bg-white transition-colors"
+                whileHover={{ scale: 1.1, rotate: 90 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <span className="text-2xl">×</span>
+              </motion.button>
+
+              <h2 className="text-4xl tracking-tighter mb-2">
+                LOG<span className="text-[#00d9ff]">IN</span>
+              </h2>
+              <p className="text-sm text-[#737373] mb-8">Войдите в свой аккаунт</p>
+
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-xs tracking-widest text-[#737373] mb-2">EMAIL</label>
+                  <input
+                    type="email"
+                    className="w-full bg-transparent border-2 border-[#262626] px-4 py-3 focus:border-[#00d9ff] outline-none transition-colors"
+                    placeholder="your@email.com"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs tracking-widest text-[#737373] mb-2">PASSWORD</label>
+                  <input
+                    type="password"
+                    className="w-full bg-transparent border-2 border-[#262626] px-4 py-3 focus:border-[#00d9ff] outline-none transition-colors"
+                    placeholder="••••••••"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between text-sm">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" className="w-4 h-4" />
+                    <span className="text-[#737373]">Запомнить меня</span>
+                  </label>
+                  <button className="text-[#00d9ff] hover:text-white transition-colors">
+                    Забыли пароль?
+                  </button>
+                </div>
+
+                <motion.button
+                  className="w-full bg-[#00d9ff] text-black py-4 tracking-widest text-sm hover:bg-white transition-colors"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  ВОЙТИ
+                </motion.button>
+
+                <p className="text-center text-sm text-[#737373]">
+                  Нет аккаунта?{" "}
+                  <button
+                    onClick={() => {
+                      setShowLogin(false);
+                      setShowRegister(true);
+                    }}
+                    className="text-[#00d9ff] hover:text-white transition-colors"
+                  >
+                    Зарегистрироваться
+                  </button>
+                </p>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Register Modal */}
+      <AnimatePresence>
+        {showRegister && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowRegister(false)}
+            className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex items-center justify-center p-8"
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0, y: 50 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.8, opacity: 0, y: 50 }}
+              transition={{ type: "spring", duration: 0.5 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-black border-2 border-[#00d9ff] max-w-md w-full p-8 relative"
+            >
+              <motion.button
+                onClick={() => setShowRegister(false)}
+                className="absolute -top-4 -right-4 w-12 h-12 bg-[#00d9ff] text-black flex items-center justify-center hover:bg-white transition-colors"
+                whileHover={{ scale: 1.1, rotate: 90 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <span className="text-2xl">×</span>
+              </motion.button>
+
+              <h2 className="text-4xl tracking-tighter mb-2">
+                REGIS<span className="text-[#00d9ff]">TER</span>
+              </h2>
+              <p className="text-sm text-[#737373] mb-8">Создайте новый аккаунт</p>
+
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-xs tracking-widest text-[#737373] mb-2">ИМЯ</label>
+                  <input
+                    type="text"
+                    className="w-full bg-transparent border-2 border-[#262626] px-4 py-3 focus:border-[#00d9ff] outline-none transition-colors"
+                    placeholder="Ваше имя"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs tracking-widest text-[#737373] mb-2">EMAIL</label>
+                  <input
+                    type="email"
+                    className="w-full bg-transparent border-2 border-[#262626] px-4 py-3 focus:border-[#00d9ff] outline-none transition-colors"
+                    placeholder="your@email.com"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs tracking-widest text-[#737373] mb-2">PASSWORD</label>
+                  <input
+                    type="password"
+                    className="w-full bg-transparent border-2 border-[#262626] px-4 py-3 focus:border-[#00d9ff] outline-none transition-colors"
+                    placeholder="••••••••"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs tracking-widest text-[#737373] mb-2">CONFIRM PASSWORD</label>
+                  <input
+                    type="password"
+                    className="w-full bg-transparent border-2 border-[#262626] px-4 py-3 focus:border-[#00d9ff] outline-none transition-colors"
+                    placeholder="••••••••"
+                  />
+                </div>
+
+                <label className="flex items-center gap-2 cursor-pointer text-sm">
+                  <input type="checkbox" className="w-4 h-4" />
+                  <span className="text-[#737373]">Я согласен с условиями использования</span>
+                </label>
+
+                <motion.button
+                  className="w-full bg-[#00d9ff] text-black py-4 tracking-widest text-sm hover:bg-white transition-colors"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  ЗАРЕГИСТРИРОВАТЬСЯ
+                </motion.button>
+
+                <p className="text-center text-sm text-[#737373]">
+                  Уже есть аккаунт?{" "}
+                  <button
+                    onClick={() => {
+                      setShowRegister(false);
+                      setShowLogin(true);
+                    }}
+                    className="text-[#00d9ff] hover:text-white transition-colors"
+                  >
+                    Войти
+                  </button>
+                </p>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Cart Modal */}
+      <AnimatePresence>
+        {showCart && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowCart(false)}
+            className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex items-center justify-end p-8"
+          >
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 25 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-black border-l-2 border-[#00d9ff] w-full max-w-lg h-full p-8 relative overflow-y-auto"
+            >
+              <motion.button
+                onClick={() => setShowCart(false)}
+                className="absolute top-4 right-4 w-12 h-12 border-2 border-[#262626] hover:border-[#00d9ff] flex items-center justify-center transition-colors"
+                whileHover={{ scale: 1.1, rotate: 90 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <span className="text-2xl">×</span>
+              </motion.button>
+
+              <h2 className="text-4xl tracking-tighter mb-2">
+                КОРЗ<span className="text-[#00d9ff]">ИНА</span>
+              </h2>
+              <p className="text-sm text-[#737373] mb-8">
+                {cart} {cart === 1 ? "товар" : "товара"}
+              </p>
+
+              {cartItems.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-[60vh] text-center">
+                  <ShoppingCart className="w-20 h-20 text-[#262626] mb-4" />
+                  <p className="text-xl text-[#737373] mb-2">Корзина пуста</p>
+                  <p className="text-sm text-[#737373]">Добавьте товары для оформления заказа</p>
+                </div>
+              ) : (
+                <>
+                  <div className="space-y-4 mb-8">
+                    {cartItems.map((item, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, x: 50 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                        className="flex gap-4 border-2 border-[#262626] p-4 hover:border-[#00d9ff] transition-colors group"
+                      >
+                        <div className="w-20 h-20 bg-black border border-[#262626] overflow-hidden">
+                          <img
+                            src={item.image}
+                            alt={item.name}
+                            className="w-full h-full object-contain grayscale group-hover:grayscale-0 transition-all duration-300"
+                          />
+                        </div>
+
+                        <div className="flex-1">
+                          <h4 className="tracking-tight mb-1">{item.name}</h4>
+                          <p className="text-xs text-[#737373] mb-2">Размер: {item.size}</p>
+                          <p className="text-[#00d9ff]">{item.price}</p>
+                        </div>
+
+                        <button
+                          onClick={() => {
+                            const newItems = [...cartItems];
+                            newItems.splice(index, 1);
+                            setCartItems(newItems);
+                            setCart(cart - 1);
+                          }}
+                          className="text-[#737373] hover:text-[#ff0033] transition-colors"
+                        >
+                          ×
+                        </button>
+                      </motion.div>
+                    ))}
+                  </div>
+
+                  <div className="border-t-2 border-[#262626] pt-6 space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[#737373]">Подытог:</span>
+                      <span className="text-xl tracking-tighter">
+                        {cartItems.reduce((sum, item) => sum + parseInt(item.price.replace(/[^\d]/g, "")), 0).toLocaleString()} ₽
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center">
+                      <span className="text-[#737373]">Доставка:</span>
+                      <span className="text-[#00d9ff]">Бесплатно</span>
+                    </div>
+
+                    <div className="flex justify-between items-center text-xl border-t-2 border-[#262626] pt-4">
+                      <span>Итого:</span>
+                      <span className="text-[#00d9ff] tracking-tighter">
+                        {cartItems.reduce((sum, item) => sum + parseInt(item.price.replace(/[^\d]/g, "")), 0).toLocaleString()} ₽
+                      </span>
+                    </div>
+
+                    <motion.button
+                      className="w-full bg-[#00d9ff] text-black py-4 tracking-widest text-sm hover:bg-white transition-colors"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      ОФОРМИТЬ ЗАКАЗ
+                    </motion.button>
+                  </div>
+                </>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Product Detail Modal */}
       <AnimatePresence>
         {showModal && (
           <motion.div
@@ -623,10 +944,7 @@ export default function App() {
 
                   {/* Add to cart */}
                   <motion.button
-                    onClick={() => {
-                      setCart(cart + 1);
-                      setShowModal(false);
-                    }}
+                    onClick={handleAddToCart}
                     className="w-full bg-[#00d9ff] text-black py-5 tracking-widest text-sm hover:bg-white transition-colors"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
