@@ -3,11 +3,12 @@
   "private": true,
   "version": "0.0.1",
   "scripts": {
+    "postinstall": "prisma generate",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "db:push": "prisma db push",
-    "db:seed": "ts-node --compiler-options '{\"module\":\"CommonJS\"}' prisma/seed.ts",
+    "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio"
   },
   "dependencies": {
@@ -69,6 +70,7 @@
     "@types/react-dom": "18.3.7",
     "prisma": "^6.19.3",
     "tailwindcss": "4.1.12",
+    "tsx": "^4.22.3",
     "typescript": "5.8.3"
   }
 }
