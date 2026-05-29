@@ -25,7 +25,7 @@ const staticProducts: Product[] = [
     name: 'ULTRA BLACK',
     series: 'SIGNATURE',
     price: '12,900 ₽',
-    image: 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+    image: 'https://omegtzfmfijsxwbegugd.supabase.co/storage/v1/object/public/products/ultra-black.jpg',
     description: '100% органический хлопок • 220 г/м²',
   },
   {
@@ -34,7 +34,7 @@ const staticProducts: Product[] = [
     name: 'VOID ESSENTIAL',
     series: 'CORE',
     price: '11,500 ₽',
-    image: 'https://images.unsplash.com/photo-1562135291-7728cc647783?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+    image: 'https://omegtzfmfijsxwbegugd.supabase.co/storage/v1/object/public/products/void-essential.jpg',
     description: 'Премиум хлопок • 200 г/м²',
   },
   {
@@ -43,7 +43,7 @@ const staticProducts: Product[] = [
     name: 'MINIMAL BLACK',
     series: 'CLASSIC',
     price: '10,900 ₽',
-    image: 'https://images.unsplash.com/photo-1610502778270-c5c6f4c7d575?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+    image: 'https://omegtzfmfijsxwbegugd.supabase.co/storage/v1/object/public/products/minimal-black.jpg',
     description: 'Качественный хлопок • 180 г/м²',
   },
   {
@@ -52,7 +52,7 @@ const staticProducts: Product[] = [
     name: 'DARK MATTER',
     series: 'LIMITED',
     price: '13,500 ₽',
-    image: 'https://images.unsplash.com/photo-1759572095317-3a96f9a98e2b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+    image: 'https://omegtzfmfijsxwbegugd.supabase.co/storage/v1/object/public/products/dark-matter.jpg',
     description: 'Премиум материал • 240 г/м²',
   },
   {
@@ -61,7 +61,7 @@ const staticProducts: Product[] = [
     name: 'SHADOW FORM',
     series: 'PREMIUM',
     price: '12,200 ₽',
-    image: 'https://images.unsplash.com/photo-1759572095384-1a7e646d0d4f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+    image: 'https://omegtzfmfijsxwbegugd.supabase.co/storage/v1/object/public/products/shadow-form.jpg',
     description: 'Органический хлопок • 210 г/м²',
   },
   {
@@ -70,7 +70,7 @@ const staticProducts: Product[] = [
     name: 'OBSIDIAN CORE',
     series: 'EXCLUSIVE',
     price: '14,900 ₽',
-    image: 'https://images.unsplash.com/photo-1696086152513-c74dc1d4b135?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+    image: 'https://omegtzfmfijsxwbegugd.supabase.co/storage/v1/object/public/products/obsidian-core.jpg',
     description: '100% премиум хлопок • 260 г/м²',
   },
 ]

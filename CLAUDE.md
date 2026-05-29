@@ -69,8 +69,9 @@ middleware.ts    ← Supabase session refresh on every non-static request
 
 **Environment variables** (see `.env.local.example`):
 - `DATABASE_URL` — Supabase PostgreSQL connection string (use Transaction pooler on port 6543 for Vercel)
+- `DIRECT_URL` — direct (non-pooled) connection string, required by Prisma for migrations/`db push` (use Session pooler on port 5432, or the direct connection on port 5432)
 - `NEXT_PUBLIC_SUPABASE_URL` — "Project URL" from Supabase project settings → API
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY` — "Publishable key" from Supabase project settings → API (previously labelled "anon public")
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` — "Publishable key" from Supabase project settings → API (previously labelled "anon public")
 
 **Data layer:** `getAllProducts()` and `getProductBySlug()` try Prisma first and fall back to the hardcoded `staticProducts` array when `DATABASE_URL` is not reachable. This means the app builds and runs without a DB configured — the switch to live data is transparent once credentials are added.
 
