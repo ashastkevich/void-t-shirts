@@ -16,6 +16,7 @@ model Product {
   price       Int
   description String
   imageUrl    String
+  images      String[]
   weight      Int?
   createdAt   DateTime    @default(now())
   orderItems  OrderItem[]

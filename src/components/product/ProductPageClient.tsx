@@ -2,16 +2,15 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { motion } from 'motion/react'
 import { ArrowLeft } from 'lucide-react'
 import type { Product } from '@/lib/products'
 import { AnimatedBackground } from '@/components/ui/AnimatedBackground'
+import { ProductGallery } from '@/components/product/ProductGallery'
 import { useCartStore } from '@/store/cart'
 
 export function ProductPageClient({ product }: { product: Product }) {
   const [selectedSize, setSelectedSize] = useState('M')
-  const [isImageHovered, setIsImageHovered] = useState(false)
   const [qty, setQty] = useState(1)
   const { addItem } = useCartStore()
 
@@ -39,37 +38,13 @@ export function ProductPageClient({ product }: { product: Product }) {
         </motion.div>
 
         <div className="grid md:grid-cols-2 gap-16 items-center">
-          {/* Image */}
+          {/* Image gallery */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="relative group"
-            onMouseEnter={() => setIsImageHovered(true)}
-            onMouseLeave={() => setIsImageHovered(false)}
           >
-            {isImageHovered && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: [0.3, 0.6, 0.3], scale: [1, 1.1, 1] }}
-                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-                className="absolute inset-0 blur-3xl bg-[#00d9ff] z-0"
-              />
-            )}
-            <div className="relative w-full h-[600px] border-2 border-[#00d9ff] overflow-hidden bg-black">
-              <Image
-                src={product.image}
-                alt={product.name}
-                fill
-                sizes="(max-width: 768px) 100vw, 50vw"
-                priority
-                className={`object-contain transition-all duration-500 ${
-                  isImageHovered ? '' : 'grayscale'
-                }`}
-              />
-            </div>
-            <div className="absolute -top-4 -left-4 w-24 h-24 border-t-4 border-l-4 border-[#00d9ff]" />
-            <div className="absolute -bottom-4 -right-4 w-24 h-24 border-b-4 border-r-4 border-[#00d9ff]" />
+            <ProductGallery images={product.images} name={product.name} />
           </motion.div>
 
           {/* Details */}

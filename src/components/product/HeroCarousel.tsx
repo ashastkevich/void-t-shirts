@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'motion/react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, ZoomIn } from 'lucide-react'
 import type { Product } from '@/lib/products'
 
 type HeroCarouselProps = {
@@ -11,6 +11,7 @@ type HeroCarouselProps = {
   currentIndex: number
   onSlideChange: (index: number, direction: number) => void
   onViewDetails: () => void
+  onImageClick: () => void
 }
 
 const slideVariants = {
@@ -34,6 +35,7 @@ export function HeroCarousel({
   currentIndex,
   onSlideChange,
   onViewDetails,
+  onImageClick,
 }: HeroCarouselProps) {
   const [direction, setDirection] = useState(0)
   const [isAutoplay, setIsAutoplay] = useState(true)
@@ -145,7 +147,10 @@ export function HeroCarousel({
                   />
                 )}
 
-                <div className="relative w-full h-[260px] sm:h-[380px] md:h-[500px] lg:h-[600px] border-2 border-[#00d9ff] overflow-hidden bg-black">
+                <div
+                  className="relative w-full h-[260px] sm:h-[380px] md:h-[500px] lg:h-[600px] border-2 border-[#00d9ff] overflow-hidden bg-black cursor-zoom-in"
+                  onClick={onImageClick}
+                >
                   <Image
                     src={current.image}
                     alt={current.name}
@@ -156,6 +161,11 @@ export function HeroCarousel({
                       isImageHovered ? '' : 'grayscale'
                     }`}
                   />
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                    <div className="bg-black/50 border border-[#00d9ff]/60 p-2">
+                      <ZoomIn className="w-6 h-6 text-[#00d9ff]" />
+                    </div>
+                  </div>
                 </div>
 
                 <motion.div

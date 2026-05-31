@@ -12,6 +12,8 @@ import { LoginModal } from '@/components/auth/LoginModal'
 import { RegisterModal } from '@/components/auth/RegisterModal'
 import { HeroCarousel } from '@/components/product/HeroCarousel'
 import { ProductDetailModal } from '@/components/product/ProductDetailModal'
+import { Lightbox } from '@/components/product/ProductGallery'
+import { AnimatePresence } from 'motion/react'
 
 export default function App({ products }: { products: Product[] }) {
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -20,6 +22,7 @@ export default function App({ products }: { products: Product[] }) {
   const [showLogin, setShowLogin] = useState(false)
   const [showRegister, setShowRegister] = useState(false)
   const [showCart, setShowCart] = useState(false)
+  const [showLightbox, setShowLightbox] = useState(false)
   const [user, setUser] = useState<User | null>(null)
 
   const { addItem } = useCartStore()
@@ -56,14 +59,15 @@ export default function App({ products }: { products: Product[] }) {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return
-      if (showModal) setShowModal(false)
+      if (showLightbox) setShowLightbox(false)
+      else if (showModal) setShowModal(false)
       else if (showCart) setShowCart(false)
       else if (showLogin) setShowLogin(false)
       else if (showRegister) setShowRegister(false)
     }
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [showModal, showCart, showLogin, showRegister])
+  }, [showLightbox, showModal, showCart, showLogin, showRegister])
 
   const handleCheckout = () => {
     if (!user) {
@@ -95,8 +99,20 @@ export default function App({ products }: { products: Product[] }) {
           currentIndex={currentIndex}
           onSlideChange={setCurrentIndex}
           onViewDetails={() => setShowModal(true)}
+          onImageClick={() => setShowLightbox(true)}
         />
       </div>
+
+      <AnimatePresence>
+        {showLightbox && (
+          <Lightbox
+            images={current.images}
+            name={current.name}
+            startIndex={0}
+            onClose={() => setShowLightbox(false)}
+          />
+        )}
+      </AnimatePresence>
 
       <ProductDetailModal
         show={showModal}

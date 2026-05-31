@@ -7,6 +7,7 @@ export type Product = {
   series: string
   price: string
   image: string
+  images: string[]
   description: string
 }
 
@@ -19,6 +20,14 @@ export type CartItem = {
   quantity: number
 }
 
+const BASE = 'https://omegtzfmfijsxwbegugd.supabase.co/storage/v1/object/public/products'
+
+function staticImgs(slug: string, count: number): string[] {
+  return Array.from({ length: count }, (_, i) =>
+    i === 0 ? `${BASE}/${slug}.jpg` : `${BASE}/${slug}-${i + 1}.jpg`
+  )
+}
+
 const staticProducts: Product[] = [
   {
     id: '1',
@@ -26,7 +35,8 @@ const staticProducts: Product[] = [
     name: 'ULTRA BLACK',
     series: 'SIGNATURE',
     price: '12,900 ₽',
-    image: 'https://omegtzfmfijsxwbegugd.supabase.co/storage/v1/object/public/products/ultra-black.jpg',
+    image: `${BASE}/ultra-black.jpg`,
+    images: staticImgs('ultra-black', 3),
     description: '100% органический хлопок • 220 г/м²',
   },
   {
@@ -35,7 +45,8 @@ const staticProducts: Product[] = [
     name: 'VOID ESSENTIAL',
     series: 'CORE',
     price: '11,500 ₽',
-    image: 'https://omegtzfmfijsxwbegugd.supabase.co/storage/v1/object/public/products/void-essential.jpg',
+    image: `${BASE}/void-essential.jpg`,
+    images: staticImgs('void-essential', 3),
     description: 'Премиум хлопок • 200 г/м²',
   },
   {
@@ -44,7 +55,8 @@ const staticProducts: Product[] = [
     name: 'MINIMAL BLACK',
     series: 'CLASSIC',
     price: '10,900 ₽',
-    image: 'https://omegtzfmfijsxwbegugd.supabase.co/storage/v1/object/public/products/minimal-black.jpg',
+    image: `${BASE}/minimal-black.jpg`,
+    images: staticImgs('minimal-black', 3),
     description: 'Качественный хлопок • 180 г/м²',
   },
   {
@@ -53,7 +65,8 @@ const staticProducts: Product[] = [
     name: 'DARK MATTER',
     series: 'LIMITED',
     price: '13,500 ₽',
-    image: 'https://omegtzfmfijsxwbegugd.supabase.co/storage/v1/object/public/products/dark-matter.jpg',
+    image: `${BASE}/dark-matter.jpg`,
+    images: staticImgs('dark-matter', 3),
     description: 'Премиум материал • 240 г/м²',
   },
   {
@@ -62,7 +75,8 @@ const staticProducts: Product[] = [
     name: 'SHADOW FORM',
     series: 'PREMIUM',
     price: '12,200 ₽',
-    image: 'https://omegtzfmfijsxwbegugd.supabase.co/storage/v1/object/public/products/shadow-form.jpg',
+    image: `${BASE}/shadow-form.jpg`,
+    images: staticImgs('shadow-form', 3),
     description: 'Органический хлопок • 210 г/м²',
   },
   {
@@ -71,7 +85,8 @@ const staticProducts: Product[] = [
     name: 'OBSIDIAN CORE',
     series: 'EXCLUSIVE',
     price: '14,900 ₽',
-    image: 'https://omegtzfmfijsxwbegugd.supabase.co/storage/v1/object/public/products/obsidian-core.jpg',
+    image: `${BASE}/obsidian-core.jpg`,
+    images: staticImgs('obsidian-core', 3),
     description: '100% премиум хлопок • 260 г/м²',
   },
 ]
@@ -83,16 +98,19 @@ function dbRowToProduct(row: {
   series: string
   price: number
   imageUrl: string
+  images: string[]
   description: string
 }): Product {
   const rubles = Math.floor(row.price / 100)
+  const images = row.images.length > 0 ? row.images : [row.imageUrl]
   return {
     id: row.id,
     slug: row.slug,
     name: row.name,
     series: row.series,
     price: rubles.toLocaleString('ru-RU') + ' ₽',
-    image: row.imageUrl,
+    image: images[0],
+    images,
     description: row.description,
   }
 }

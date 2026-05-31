@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
 import { motion, AnimatePresence } from 'motion/react'
 import type { Product } from '@/lib/products'
+import { ProductGallery } from '@/components/product/ProductGallery'
 
 type ProductDetailModalProps = {
   show: boolean
@@ -53,25 +53,13 @@ export function ProductDetailModal({
             </motion.button>
 
             <div className="grid md:grid-cols-2 gap-6 md:gap-8 p-4 sm:p-8 md:p-12">
-              {/* Image */}
+              {/* Image gallery */}
               <motion.div
                 initial={{ x: -50, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: 0.2 }}
-                className="relative group"
               >
-                <motion.div className="absolute inset-0 blur-3xl bg-[#00d9ff] opacity-0 group-hover:opacity-40 transition-opacity duration-500 z-0" />
-                <div className="relative w-full h-[220px] sm:h-[350px] md:h-[500px] border-2 border-[#262626] overflow-hidden bg-black">
-                  <Image
-                    src={product.image}
-                    alt={product.name}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                    className="object-contain grayscale group-hover:grayscale-0 transition-all duration-500"
-                  />
-                </div>
-                <div className="absolute -top-3 -left-3 w-16 h-16 border-t-4 border-l-4 border-[#00d9ff]" />
-                <div className="absolute -bottom-3 -right-3 w-16 h-16 border-b-4 border-r-4 border-[#00d9ff]" />
+                <ProductGallery images={product.images} name={product.name} compact />
               </motion.div>
 
               {/* Details */}
