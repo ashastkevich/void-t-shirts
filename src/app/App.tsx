@@ -80,8 +80,6 @@ export default function App({ products }: { products: Product[] }) {
         products={products}
         currentIndex={currentIndex}
         onSlideChange={setCurrentIndex}
-        selectedSize={selectedSize}
-        onSizeChange={setSelectedSize}
         onViewDetails={() => setShowModal(true)}
       />
 

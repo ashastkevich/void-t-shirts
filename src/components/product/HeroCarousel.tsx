@@ -10,8 +10,6 @@ type HeroCarouselProps = {
   products: Product[]
   currentIndex: number
   onSlideChange: (index: number, direction: number) => void
-  selectedSize: string
-  onSizeChange: (size: string) => void
   onViewDetails: () => void
 }
 
@@ -35,13 +33,12 @@ export function HeroCarousel({
   products,
   currentIndex,
   onSlideChange,
-  selectedSize,
-  onSizeChange,
   onViewDetails,
 }: HeroCarouselProps) {
   const [direction, setDirection] = useState(0)
   const [isAutoplay, setIsAutoplay] = useState(true)
   const [isImageHovered, setIsImageHovered] = useState(false)
+
 
   const current = products[currentIndex]
 
@@ -80,11 +77,6 @@ export function HeroCarousel({
   const handleViewDetails = () => {
     setIsAutoplay(false)
     onViewDetails()
-  }
-
-  const handleSizeChange = (size: string) => {
-    setIsAutoplay(false)
-    onSizeChange(size)
   }
 
   return (
@@ -133,6 +125,7 @@ export function HeroCarousel({
                     alt={current.name}
                     fill
                     sizes="(max-width: 768px) 100vw, 50vw"
+                    priority={currentIndex === 0}
                     className={`object-contain transition-all duration-500 ${
                       isImageHovered ? '' : 'grayscale'
                     }`}
@@ -213,31 +206,6 @@ export function HeroCarousel({
                   </motion.button>
                 </motion.div>
 
-                <motion.div
-                  className="flex items-center gap-4 mt-8"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.9 }}
-                >
-                  <span className="text-xs text-[#737373] tracking-widest">SIZES:</span>
-                  {['XS', 'S', 'M', 'L', 'XL'].map((size, i) => (
-                    <motion.div
-                      key={size}
-                      onClick={() => handleSizeChange(size)}
-                      className={`w-10 h-10 border flex items-center justify-center text-xs cursor-pointer transition-all ${
-                        selectedSize === size
-                          ? 'border-[#00d9ff] bg-[#00d9ff] text-black'
-                          : 'border-[#262626] hover:border-[#00d9ff] hover:text-[#00d9ff]'
-                      }`}
-                      whileHover={{ scale: 1.1 }}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 1 + i * 0.05 }}
-                    >
-                      {size}
-                    </motion.div>
-                  ))}
-                </motion.div>
               </motion.div>
             </div>
           </motion.div>
