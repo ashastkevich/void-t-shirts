@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { motion } from 'motion/react'
 import { ShoppingCart, User, UserPlus, LogOut } from 'lucide-react'
 import { useCartStore } from '@/store/cart'
@@ -13,6 +14,7 @@ type HeaderProps = {
   onRegisterOpen: () => void
   user: string | null
   onLogout: () => void
+  onLogoClick: () => void
 }
 
 export function Header({
@@ -24,6 +26,7 @@ export function Header({
   onRegisterOpen,
   user,
   onLogout,
+  onLogoClick,
 }: HeaderProps) {
   const cartCount = useCartStore((state) => state.items.length)
 
@@ -34,13 +37,15 @@ export function Header({
       transition={{ duration: 0.8, delay: 0.2 }}
       className="fixed top-0 left-0 right-0 z-50 px-8 py-8 flex items-center justify-between"
     >
-      <motion.h1
-        className="text-4xl tracking-tighter font-bold cursor-pointer"
-        whileHover={{ scale: 1.05 }}
-      >
-        <span className="text-white">VOID</span>
-        <span className="text-[#00d9ff]">.</span>
-      </motion.h1>
+      <Link href="/" onClick={onLogoClick}>
+        <motion.h1
+          className="text-4xl tracking-tighter font-bold cursor-pointer"
+          whileHover={{ scale: 1.05 }}
+        >
+          <span className="text-white">VOID</span>
+          <span className="text-[#00d9ff]">.</span>
+        </motion.h1>
+      </Link>
 
       <div className="flex items-center gap-2">
         {[...Array(total)].map((_, index) => (
@@ -101,7 +106,7 @@ export function Header({
               whileTap={{ scale: 0.95 }}
             >
               <User className="w-4 h-4" />
-              <span className="text-xs tracking-widest hidden md:inline">LOGIN</span>
+              <span className="text-xs tracking-widest hidden md:inline">ВОЙТИ</span>
             </motion.button>
 
             <motion.button
@@ -111,7 +116,7 @@ export function Header({
               whileTap={{ scale: 0.95 }}
             >
               <UserPlus className="w-4 h-4" />
-              <span className="text-xs tracking-widest hidden md:inline">REGISTER</span>
+              <span className="text-xs tracking-widest hidden md:inline">РЕГИСТРАЦИЯ</span>
             </motion.button>
           </>
         )}

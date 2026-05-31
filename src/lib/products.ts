@@ -16,6 +16,7 @@ export type CartItem = {
   size: string
   price: string
   image: string
+  quantity: number
 }
 
 const staticProducts: Product[] = [

@@ -15,6 +15,31 @@ export function LoginModal({ show, onClose, onSwitchToRegister }: LoginModalProp
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [resetSent, setResetSent] = useState(false)
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      setError('Введите email для сброса пароля')
+      return
+    }
+    setLoading(true)
+    setError(null)
+    try {
+      const supabase = createClient()
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/reset-password`,
+      })
+      if (resetError) {
+        setError(resetError.message)
+      } else {
+        setResetSent(true)
+      }
+    } catch {
+      setError('Не удалось отправить письмо. Проверьте соединение.')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -70,6 +95,25 @@ export function LoginModal({ show, onClose, onSwitchToRegister }: LoginModalProp
             </h2>
             <p className="text-sm text-[#737373] mb-8">Войдите в свой аккаунт</p>
 
+            {resetSent ? (
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="border border-[#00d9ff]/40 px-6 py-8 text-center space-y-4"
+              >
+                <p className="text-[#00d9ff] tracking-widest text-sm">ПИСЬМО ОТПРАВЛЕНО</p>
+                <p className="text-[#737373] text-sm">
+                  Инструкция по сбросу пароля отправлена на <span className="text-white">{email}</span>
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setResetSent(false)}
+                  className="text-xs text-[#737373] hover:text-[#00d9ff] transition-colors tracking-widest"
+                >
+                  ВЕРНУТЬСЯ К ВХОДУ
+                </button>
+              </motion.div>
+            ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label className="block text-xs tracking-widest text-[#737373] mb-2">EMAIL</label>
@@ -84,7 +128,7 @@ export function LoginModal({ show, onClose, onSwitchToRegister }: LoginModalProp
               </div>
 
               <div>
-                <label className="block text-xs tracking-widest text-[#737373] mb-2">PASSWORD</label>
+                <label className="block text-xs tracking-widest text-[#737373] mb-2">ПАРОЛЬ</label>
                 <input
                   type="password"
                   value={password}
@@ -110,7 +154,12 @@ export function LoginModal({ show, onClose, onSwitchToRegister }: LoginModalProp
                   <input type="checkbox" className="w-4 h-4" />
                   <span className="text-[#737373]">Запомнить меня</span>
                 </label>
-                <button type="button" className="text-[#00d9ff] hover:text-white transition-colors">
+                <button
+                  type="button"
+                  onClick={handleForgotPassword}
+                  disabled={loading}
+                  className="text-[#00d9ff] hover:text-white transition-colors disabled:opacity-50"
+                >
                   Забыли пароль?
                 </button>
               </div>
@@ -136,6 +185,7 @@ export function LoginModal({ show, onClose, onSwitchToRegister }: LoginModalProp
                 </button>
               </p>
             </form>
+            )}
           </motion.div>
         </motion.div>
       )}

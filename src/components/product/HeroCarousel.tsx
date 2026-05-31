@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'motion/react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
@@ -38,6 +38,7 @@ export function HeroCarousel({
   const [direction, setDirection] = useState(0)
   const [isAutoplay, setIsAutoplay] = useState(true)
   const [isImageHovered, setIsImageHovered] = useState(false)
+  const touchStartX = useRef<number | null>(null)
 
 
   const current = products[currentIndex]
@@ -74,15 +75,40 @@ export function HeroCarousel({
     onSlideChange(index, dir)
   }
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') prevSlide()
+      else if (e.key === 'ArrowRight') nextSlide()
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [currentIndex, products.length])
+
   const handleViewDetails = () => {
     setIsAutoplay(false)
     onViewDetails()
   }
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX
+  }
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return
+    const delta = e.changedTouches[0].clientX - touchStartX.current
+    touchStartX.current = null
+    if (delta > 50) prevSlide()
+    else if (delta < -50) nextSlide()
+  }
+
   return (
     <>
       {/* Main slide */}
-      <div className="h-full flex items-center justify-center px-4 md:px-0">
+      <div
+        className="relative h-full flex items-center justify-center px-4 md:px-0"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
         <AnimatePresence mode="wait" custom={direction}>
           <motion.div
             key={currentIndex}
@@ -119,7 +145,7 @@ export function HeroCarousel({
                   />
                 )}
 
-                <div className="relative w-full h-[600px] border-2 border-[#00d9ff] overflow-hidden bg-black">
+                <div className="relative w-full h-[260px] sm:h-[380px] md:h-[500px] lg:h-[600px] border-2 border-[#00d9ff] overflow-hidden bg-black">
                   <Image
                     src={current.image}
                     alt={current.name}
@@ -162,7 +188,7 @@ export function HeroCarousel({
                 </motion.div>
 
                 <motion.h2
-                  className="text-7xl md:text-8xl tracking-tighter leading-none mb-6"
+                  className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl tracking-tighter leading-none mb-6"
                   initial={{ opacity: 0, y: 50 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.4 }}
@@ -194,7 +220,7 @@ export function HeroCarousel({
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.8 }}
                 >
-                  <div className="text-5xl tracking-tighter text-[#00d9ff]">{current.price}</div>
+                  <div className="text-3xl sm:text-4xl md:text-5xl tracking-tighter text-[#00d9ff]">{current.price}</div>
 
                   <motion.button
                     onClick={handleViewDetails}
@@ -202,7 +228,7 @@ export function HeroCarousel({
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    VIEW DETAILS
+                    ПОДРОБНЕЕ
                   </motion.button>
                 </motion.div>
 
@@ -218,11 +244,12 @@ export function HeroCarousel({
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 1.2 }}
         onClick={prevSlide}
-        className="hidden lg:flex fixed left-2 xl:left-4 top-1/2 -translate-y-1/2 z-40 w-12 h-12 xl:w-14 xl:h-14 border-2 border-[#262626] hover:border-[#00d9ff] items-center justify-center group transition-all bg-black/90 backdrop-blur-sm"
+        aria-label="Предыдущий товар"
+        className="flex fixed left-2 xl:left-4 top-1/2 -translate-y-1/2 z-40 w-10 h-10 lg:w-12 lg:h-12 xl:w-14 xl:h-14 border-2 border-[#262626] hover:border-[#00d9ff] items-center justify-center group transition-all bg-black/90 backdrop-blur-sm"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
       >
-        <ChevronLeft className="w-5 h-5 xl:w-6 xl:h-6 group-hover:text-[#00d9ff] transition-colors" />
+        <ChevronLeft className="w-4 h-4 lg:w-5 lg:h-5 xl:w-6 xl:h-6 group-hover:text-[#00d9ff] transition-colors" />
       </motion.button>
 
       <motion.button
@@ -230,11 +257,12 @@ export function HeroCarousel({
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 1.2 }}
         onClick={nextSlide}
-        className="hidden lg:flex fixed right-2 xl:right-4 top-1/2 -translate-y-1/2 z-40 w-12 h-12 xl:w-14 xl:h-14 border-2 border-[#262626] hover:border-[#00d9ff] items-center justify-center group transition-all bg-black/90 backdrop-blur-sm"
+        aria-label="Следующий товар"
+        className="flex fixed right-2 xl:right-4 top-1/2 -translate-y-1/2 z-40 w-10 h-10 lg:w-12 lg:h-12 xl:w-14 xl:h-14 border-2 border-[#262626] hover:border-[#00d9ff] items-center justify-center group transition-all bg-black/90 backdrop-blur-sm"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
       >
-        <ChevronRight className="w-5 h-5 xl:w-6 xl:h-6 group-hover:text-[#00d9ff] transition-colors" />
+        <ChevronRight className="w-4 h-4 lg:w-5 lg:h-5 xl:w-6 xl:h-6 group-hover:text-[#00d9ff] transition-colors" />
       </motion.button>
 
       {/* Product navigator sidebar */}
@@ -242,7 +270,7 @@ export function HeroCarousel({
         initial={{ x: 100, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ duration: 0.8, delay: 1 }}
-        className="fixed right-8 bottom-8 z-50 space-y-4"
+        className="hidden lg:block fixed right-8 bottom-8 z-50 space-y-4"
       >
         {products.map((product, index) => (
           <motion.div

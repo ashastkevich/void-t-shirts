@@ -7,10 +7,17 @@ import { motion } from 'motion/react'
 import { ArrowLeft } from 'lucide-react'
 import type { Product } from '@/lib/products'
 import { AnimatedBackground } from '@/components/ui/AnimatedBackground'
+import { useCartStore } from '@/store/cart'
 
 export function ProductPageClient({ product }: { product: Product }) {
   const [selectedSize, setSelectedSize] = useState('M')
   const [isImageHovered, setIsImageHovered] = useState(false)
+  const [qty, setQty] = useState(1)
+  const { addItem } = useCartStore()
+
+  const handleAddToCart = () => {
+    addItem({ id: product.id, name: product.name, size: selectedSize, price: product.price, image: product.image, quantity: qty })
+  }
 
   return (
     <div className="min-h-screen bg-black text-white relative overflow-hidden">
@@ -120,14 +127,16 @@ export function ProductPageClient({ product }: { product: Product }) {
               <p className="text-xs tracking-widest text-[#737373] mb-4">КОЛИЧЕСТВО</p>
               <div className="flex items-center gap-4">
                 <motion.button
+                  onClick={() => setQty((q) => Math.max(1, q - 1))}
                   className="w-12 h-12 border border-[#262626] hover:border-[#00d9ff] flex items-center justify-center transition-colors"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
                   <span className="text-xl">−</span>
                 </motion.button>
-                <span className="text-2xl w-12 text-center">1</span>
+                <span className="text-2xl w-12 text-center">{qty}</span>
                 <motion.button
+                  onClick={() => setQty((q) => q + 1)}
                   className="w-12 h-12 border border-[#262626] hover:border-[#00d9ff] flex items-center justify-center transition-colors"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -138,6 +147,7 @@ export function ProductPageClient({ product }: { product: Product }) {
             </div>
 
             <motion.button
+              onClick={handleAddToCart}
               className="w-full bg-[#00d9ff] text-black py-5 tracking-widest text-sm hover:bg-white transition-colors"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}

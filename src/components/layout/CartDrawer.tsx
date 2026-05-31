@@ -15,7 +15,7 @@ export function CartDrawer({ show, onClose, onCheckout }: CartDrawerProps) {
   const { items, removeItem } = useCartStore()
 
   const total = items
-    .reduce((sum, item) => sum + parseInt(item.price.replace(/[^\d]/g, ''), 10), 0)
+    .reduce((sum, item) => sum + parseInt(item.price.replace(/[^\d]/g, ''), 10) * item.quantity, 0)
     .toLocaleString('ru-RU')
 
   return (
@@ -81,7 +81,7 @@ export function CartDrawer({ show, onClose, onCheckout }: CartDrawerProps) {
 
                       <div className="flex-1">
                         <h4 className="tracking-tight mb-1">{item.name}</h4>
-                        <p className="text-xs text-[#737373] mb-2">Размер: {item.size}</p>
+                        <p className="text-xs text-[#737373] mb-2">Размер: {item.size} · {item.quantity} шт.</p>
                         <p className="text-[#00d9ff]">{item.price}</p>
                       </div>
 

@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'motion/react'
 import type { Product } from '@/lib/products'
@@ -10,7 +11,7 @@ type ProductDetailModalProps = {
   product: Product
   selectedSize: string
   onSizeChange: (size: string) => void
-  onAddToCart: () => void
+  onAddToCart: (qty: number) => void
 }
 
 export function ProductDetailModal({
@@ -21,6 +22,8 @@ export function ProductDetailModal({
   onSizeChange,
   onAddToCart,
 }: ProductDetailModalProps) {
+  const [qty, setQty] = useState(1)
+
   return (
     <AnimatePresence>
       {show && (
@@ -29,7 +32,7 @@ export function ProductDetailModal({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex items-center justify-center p-8"
+          className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex items-start md:items-center justify-center p-4 sm:p-8 overflow-y-auto"
         >
           <motion.div
             initial={{ scale: 0.8, opacity: 0, rotateX: -20 }}
@@ -37,7 +40,7 @@ export function ProductDetailModal({
             exit={{ scale: 0.8, opacity: 0, rotateX: 20 }}
             transition={{ type: 'spring', duration: 0.5 }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-black border-2 border-[#00d9ff] max-w-6xl w-full relative"
+            className="bg-black border-2 border-[#00d9ff] max-w-6xl w-full relative my-4 sm:my-0"
             style={{ perspective: '1000px' }}
           >
             <motion.button
@@ -49,7 +52,7 @@ export function ProductDetailModal({
               <span className="text-2xl">×</span>
             </motion.button>
 
-            <div className="grid md:grid-cols-2 gap-8 p-8 md:p-12">
+            <div className="grid md:grid-cols-2 gap-6 md:gap-8 p-4 sm:p-8 md:p-12">
               {/* Image */}
               <motion.div
                 initial={{ x: -50, opacity: 0 }}
@@ -58,7 +61,7 @@ export function ProductDetailModal({
                 className="relative group"
               >
                 <motion.div className="absolute inset-0 blur-3xl bg-[#00d9ff] opacity-0 group-hover:opacity-40 transition-opacity duration-500 z-0" />
-                <div className="relative w-full h-[500px] border-2 border-[#262626] overflow-hidden bg-black">
+                <div className="relative w-full h-[220px] sm:h-[350px] md:h-[500px] border-2 border-[#262626] overflow-hidden bg-black">
                   <Image
                     src={product.image}
                     alt={product.name}
@@ -76,7 +79,7 @@ export function ProductDetailModal({
                 initial={{ x: 50, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: 0.3 }}
-                className="space-y-6"
+                className="space-y-4 md:space-y-6"
               >
                 <div>
                   <motion.div
@@ -88,7 +91,7 @@ export function ProductDetailModal({
                     <span className="text-xs tracking-widest text-[#00d9ff]">{product.series}</span>
                   </motion.div>
 
-                  <h3 className="text-5xl tracking-tighter mb-4">
+                  <h3 className="text-3xl sm:text-4xl md:text-5xl tracking-tighter mb-3 md:mb-4">
                     {product.name.split(' ')[0]}
                     <br />
                     <span className="text-[#00d9ff]">{product.name.split(' ')[1]}</span>
@@ -96,7 +99,7 @@ export function ProductDetailModal({
 
                   <p className="text-[#737373] text-lg mb-6">{product.description}</p>
 
-                  <div className="text-4xl tracking-tighter text-[#00d9ff] mb-8">{product.price}</div>
+                  <div className="text-2xl sm:text-3xl md:text-4xl tracking-tighter text-[#00d9ff] mb-4 md:mb-8">{product.price}</div>
                 </div>
 
                 {/* Size selection */}
@@ -126,14 +129,16 @@ export function ProductDetailModal({
                   <p className="text-xs tracking-widest text-[#737373] mb-4">КОЛИЧЕСТВО</p>
                   <div className="flex items-center gap-4">
                     <motion.button
+                      onClick={() => setQty((q) => Math.max(1, q - 1))}
                       className="w-12 h-12 border border-[#262626] hover:border-[#00d9ff] flex items-center justify-center transition-colors"
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                     >
                       <span className="text-xl">−</span>
                     </motion.button>
-                    <span className="text-2xl w-12 text-center">1</span>
+                    <span className="text-2xl w-12 text-center">{qty}</span>
                     <motion.button
+                      onClick={() => setQty((q) => q + 1)}
                       className="w-12 h-12 border border-[#262626] hover:border-[#00d9ff] flex items-center justify-center transition-colors"
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
@@ -144,7 +149,7 @@ export function ProductDetailModal({
                 </div>
 
                 <motion.button
-                  onClick={onAddToCart}
+                  onClick={() => onAddToCart(qty)}
                   className="w-full bg-[#00d9ff] text-black py-5 tracking-widest text-sm hover:bg-white transition-colors"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}

@@ -48,10 +48,22 @@ export default function App({ products }: { products: Product[] }) {
     }
   }
 
-  const handleAddToCart = () => {
-    addItem({ id: current.id, name: current.name, size: selectedSize, price: current.price, image: current.image })
+  const handleAddToCart = (qty: number) => {
+    addItem({ id: current.id, name: current.name, size: selectedSize, price: current.price, image: current.image, quantity: qty })
     setShowModal(false)
   }
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return
+      if (showModal) setShowModal(false)
+      else if (showCart) setShowCart(false)
+      else if (showLogin) setShowLogin(false)
+      else if (showRegister) setShowRegister(false)
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [showModal, showCart, showLogin, showRegister])
 
   const handleCheckout = () => {
     if (!user) {
@@ -74,14 +86,17 @@ export default function App({ products }: { products: Product[] }) {
         onRegisterOpen={() => setShowRegister(true)}
         user={user?.email ?? null}
         onLogout={handleLogout}
+        onLogoClick={() => setCurrentIndex(0)}
       />
 
-      <HeroCarousel
-        products={products}
-        currentIndex={currentIndex}
-        onSlideChange={setCurrentIndex}
-        onViewDetails={() => setShowModal(true)}
-      />
+      <div className="absolute left-0 right-0 top-20 md:top-0 bottom-0">
+        <HeroCarousel
+          products={products}
+          currentIndex={currentIndex}
+          onSlideChange={setCurrentIndex}
+          onViewDetails={() => setShowModal(true)}
+        />
+      </div>
 
       <ProductDetailModal
         show={showModal}

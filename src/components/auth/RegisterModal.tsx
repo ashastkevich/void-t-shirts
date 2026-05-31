@@ -139,7 +139,7 @@ export function RegisterModal({ show, onClose, onSwitchToLogin }: RegisterModalP
                 </div>
 
                 <div>
-                  <label className="block text-xs tracking-widest text-[#737373] mb-2">PASSWORD</label>
+                  <label className="block text-xs tracking-widest text-[#737373] mb-2">ПАРОЛЬ</label>
                   <input
                     type="password"
                     value={password}
@@ -152,9 +152,7 @@ export function RegisterModal({ show, onClose, onSwitchToLogin }: RegisterModalP
                 </div>
 
                 <div>
-                  <label className="block text-xs tracking-widest text-[#737373] mb-2">
-                    CONFIRM PASSWORD
-                  </label>
+                  <label className="block text-xs tracking-widest text-[#737373] mb-2">ПОВТОРИТЕ ПАРОЛЬ</label>
                   <input
                     type="password"
                     value={confirm}
