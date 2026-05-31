@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isAdmin } from '@/lib/admin'
-import { supabaseAdmin } from '@/lib/supabase/admin'
+import { getSupabaseAdmin } from '@/lib/supabase/admin'
 
 export async function POST(request: NextRequest) {
   if (!(await isAdmin())) {
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
     const buffer = Buffer.from(await file.arrayBuffer())
 
-    const { error } = await supabaseAdmin.storage
+    const { error } = await getSupabaseAdmin().storage
       .from('products')
       .upload(filename, buffer, { contentType: file.type, upsert: false })
 
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    const { data } = supabaseAdmin.storage.from('products').getPublicUrl(filename)
+    const { data } = getSupabaseAdmin().storage.from('products').getPublicUrl(filename)
     urls.push(data.publicUrl)
   }
 
