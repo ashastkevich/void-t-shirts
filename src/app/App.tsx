@@ -13,7 +13,7 @@ import { RegisterModal } from '@/components/auth/RegisterModal'
 import { HeroCarousel } from '@/components/product/HeroCarousel'
 import { ProductDetailModal } from '@/components/product/ProductDetailModal'
 import { Lightbox } from '@/components/product/ProductGallery'
-import { AnimatePresence } from 'motion/react'
+import { AnimatePresence, motion } from 'motion/react'
 
 export default function App({ products }: { products: Product[] }) {
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -24,6 +24,7 @@ export default function App({ products }: { products: Product[] }) {
   const [showCart, setShowCart] = useState(false)
   const [showLightbox, setShowLightbox] = useState(false)
   const [user, setUser] = useState<User | null>(null)
+  const [toast, setToast] = useState<string | null>(null)
 
   const { addItem } = useCartStore()
   const current = products[currentIndex]
@@ -54,6 +55,8 @@ export default function App({ products }: { products: Product[] }) {
   const handleAddToCart = (qty: number) => {
     addItem({ id: current.id, name: current.name, size: selectedSize, price: current.price, image: current.image, quantity: qty })
     setShowModal(false)
+    setToast(`${current.name} (${selectedSize}) добавлен в корзину`)
+    setTimeout(() => setToast(null), 2500)
   }
 
   useEffect(() => {
@@ -140,6 +143,20 @@ export default function App({ products }: { products: Product[] }) {
         onClose={() => setShowRegister(false)}
         onSwitchToLogin={() => { setShowRegister(false); setShowLogin(true) }}
       />
+
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 24 }}
+            transition={{ duration: 0.25 }}
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[200] bg-[#00d9ff] text-black px-6 py-3 text-sm tracking-widest font-medium shadow-lg pointer-events-none"
+          >
+            {toast}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
