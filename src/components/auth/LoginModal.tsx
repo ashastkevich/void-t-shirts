@@ -15,19 +15,22 @@ export function LoginModal({ show, onClose, onSwitchToRegister }: LoginModalProp
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [forgotMode, setForgotMode] = useState(false)
   const [resetSent, setResetSent] = useState(false)
 
-  const handleForgotPassword = async () => {
-    if (!email) {
-      setError('Введите email для сброса пароля')
-      return
-    }
+  const enterForgotMode = () => {
+    setError(null)
+    setForgotMode(true)
+  }
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault()
     setLoading(true)
     setError(null)
     try {
       const supabase = createClient()
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/reset-password`,
+        redirectTo: `${window.location.origin}/auth/callback?next=/auth/reset-password`,
       })
       if (resetError) {
         setError(resetError.message)
@@ -107,84 +110,128 @@ export function LoginModal({ show, onClose, onSwitchToRegister }: LoginModalProp
                 </p>
                 <button
                   type="button"
-                  onClick={() => setResetSent(false)}
+                  onClick={() => { setResetSent(false); setForgotMode(false) }}
                   className="text-xs text-[#737373] hover:text-[#00d9ff] transition-colors tracking-widest"
                 >
                   ВЕРНУТЬСЯ К ВХОДУ
                 </button>
               </motion.div>
-            ) : (
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label className="block text-xs tracking-widest text-[#737373] mb-2">EMAIL</label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="w-full bg-transparent border-2 border-[#262626] px-4 py-3 focus:border-[#00d9ff] outline-none transition-colors"
-                  placeholder="your@email.com"
-                />
-              </div>
+            ) : forgotMode ? (
+              <form onSubmit={handleForgotPassword} className="space-y-6">
+                <div>
+                  <label className="block text-xs tracking-widest text-[#737373] mb-2">EMAIL</label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    autoFocus
+                    className="w-full bg-transparent border-2 border-[#262626] px-4 py-3 focus:border-[#00d9ff] outline-none transition-colors"
+                    placeholder="your@email.com"
+                  />
+                </div>
 
-              <div>
-                <label className="block text-xs tracking-widest text-[#737373] mb-2">ПАРОЛЬ</label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="w-full bg-transparent border-2 border-[#262626] px-4 py-3 focus:border-[#00d9ff] outline-none transition-colors"
-                  placeholder="••••••••"
-                />
-              </div>
+                {error && (
+                  <motion.p
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-sm text-red-400 border border-red-400/30 px-4 py-2"
+                  >
+                    {error}
+                  </motion.p>
+                )}
 
-              {error && (
-                <motion.p
-                  initial={{ opacity: 0, y: -8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="text-sm text-red-400 border border-red-400/30 px-4 py-2"
-                >
-                  {error}
-                </motion.p>
-              )}
-
-              <div className="flex items-center justify-between text-sm">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" className="w-4 h-4" />
-                  <span className="text-[#737373]">Запомнить меня</span>
-                </label>
-                <button
-                  type="button"
-                  onClick={handleForgotPassword}
+                <motion.button
+                  type="submit"
                   disabled={loading}
-                  className="text-[#00d9ff] hover:text-white transition-colors disabled:opacity-50"
+                  className="w-full bg-[#00d9ff] text-black py-4 tracking-widest text-sm hover:bg-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  whileHover={{ scale: loading ? 1 : 1.02 }}
+                  whileTap={{ scale: loading ? 1 : 0.98 }}
                 >
-                  Забыли пароль?
-                </button>
-              </div>
+                  {loading ? '...' : 'ВОССТАНОВИТЬ ПАРОЛЬ'}
+                </motion.button>
 
-              <motion.button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-[#00d9ff] text-black py-4 tracking-widest text-sm hover:bg-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                whileHover={{ scale: loading ? 1 : 1.02 }}
-                whileTap={{ scale: loading ? 1 : 0.98 }}
-              >
-                {loading ? '...' : 'ВОЙТИ'}
-              </motion.button>
+                <p className="text-center text-sm">
+                  <button
+                    type="button"
+                    onClick={() => { setForgotMode(false); setError(null) }}
+                    className="text-[#737373] hover:text-[#00d9ff] transition-colors"
+                  >
+                    Вернуться к входу
+                  </button>
+                </p>
+              </form>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div>
+                  <label className="block text-xs tracking-widest text-[#737373] mb-2">EMAIL</label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="w-full bg-transparent border-2 border-[#262626] px-4 py-3 focus:border-[#00d9ff] outline-none transition-colors"
+                    placeholder="your@email.com"
+                  />
+                </div>
 
-              <p className="text-center text-sm text-[#737373]">
-                Нет аккаунта?{' '}
-                <button
-                  type="button"
-                  onClick={onSwitchToRegister}
-                  className="text-[#00d9ff] hover:text-white transition-colors"
+                <div>
+                  <label className="block text-xs tracking-widest text-[#737373] mb-2">ПАРОЛЬ</label>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className="w-full bg-transparent border-2 border-[#262626] px-4 py-3 focus:border-[#00d9ff] outline-none transition-colors"
+                    placeholder="••••••••"
+                  />
+                </div>
+
+                {error && (
+                  <motion.p
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-sm text-red-400 border border-red-400/30 px-4 py-2"
+                  >
+                    {error}
+                  </motion.p>
+                )}
+
+                <div className="flex items-center justify-between text-sm">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" className="w-4 h-4" />
+                    <span className="text-[#737373]">Запомнить меня</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={enterForgotMode}
+                    className="text-[#00d9ff] hover:text-white transition-colors"
+                  >
+                    Забыли пароль?
+                  </button>
+                </div>
+
+                <motion.button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-[#00d9ff] text-black py-4 tracking-widest text-sm hover:bg-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  whileHover={{ scale: loading ? 1 : 1.02 }}
+                  whileTap={{ scale: loading ? 1 : 0.98 }}
                 >
-                  Зарегистрироваться
-                </button>
-              </p>
-            </form>
+                  {loading ? '...' : 'ВОЙТИ'}
+                </motion.button>
+
+                <p className="text-center text-sm text-[#737373]">
+                  Нет аккаунта?{' '}
+                  <button
+                    type="button"
+                    onClick={onSwitchToRegister}
+                    className="text-[#00d9ff] hover:text-white transition-colors"
+                  >
+                    Зарегистрироваться
+                  </button>
+                </p>
+              </form>
             )}
           </motion.div>
         </motion.div>

@@ -13,6 +13,7 @@ import { RegisterModal } from '@/components/auth/RegisterModal'
 import { HeroCarousel } from '@/components/product/HeroCarousel'
 import { ProductDetailModal } from '@/components/product/ProductDetailModal'
 import { Lightbox } from '@/components/product/ProductGallery'
+import { CheckoutModal } from '@/components/checkout/CheckoutModal'
 import { AnimatePresence, motion } from 'motion/react'
 
 export default function App({ products }: { products: Product[] }) {
@@ -26,7 +27,9 @@ export default function App({ products }: { products: Product[] }) {
   const [user, setUser] = useState<User | null>(null)
   const [toast, setToast] = useState<string | null>(null)
 
-  const { addItem } = useCartStore()
+  const [showCheckout, setShowCheckout] = useState(false)
+
+  const { addItem, items, clearCart } = useCartStore()
   const current = products[currentIndex]
 
   useEffect(() => {
@@ -63,6 +66,7 @@ export default function App({ products }: { products: Product[] }) {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return
       if (showLightbox) setShowLightbox(false)
+      else if (showCheckout) setShowCheckout(false)
       else if (showModal) setShowModal(false)
       else if (showCart) setShowCart(false)
       else if (showLogin) setShowLogin(false)
@@ -70,14 +74,23 @@ export default function App({ products }: { products: Product[] }) {
     }
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [showLightbox, showModal, showCart, showLogin, showRegister])
+  }, [showLightbox, showCheckout, showModal, showCart, showLogin, showRegister])
 
   const handleCheckout = () => {
     if (!user) {
       setShowCart(false)
       setShowLogin(true)
+    } else {
+      setShowCart(false)
+      setShowCheckout(true)
     }
-    // When user is logged in: createOrder() will be wired here in Phase 9
+  }
+
+  const handleOrderSuccess = () => {
+    clearCart()
+    setShowCheckout(false)
+    setToast('Заказ успешно оформлен!')
+    setTimeout(() => setToast(null), 3000)
   }
 
   return (
@@ -142,6 +155,13 @@ export default function App({ products }: { products: Product[] }) {
         show={showRegister}
         onClose={() => setShowRegister(false)}
         onSwitchToLogin={() => { setShowRegister(false); setShowLogin(true) }}
+      />
+
+      <CheckoutModal
+        show={showCheckout}
+        onClose={() => setShowCheckout(false)}
+        onSuccess={handleOrderSuccess}
+        items={items}
       />
 
       <AnimatePresence>

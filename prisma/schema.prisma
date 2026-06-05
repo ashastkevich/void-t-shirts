@@ -31,13 +31,17 @@ model User {
 }
 
 model Order {
-  id        String      @id @default(uuid())
-  userId    String
-  user      User        @relation(fields: [userId], references: [id])
-  status    String      @default("pending")
-  total     Int
-  createdAt DateTime    @default(now())
-  items     OrderItem[]
+  id            String      @id @default(uuid())
+  userId        String
+  user          User        @relation(fields: [userId], references: [id])
+  status        String      @default("pending")
+  total         Int
+  createdAt     DateTime    @default(now())
+  items         OrderItem[]
+  recipientName String?
+  phone         String?
+  city          String?
+  address       String?
 }
 
 model OrderItem {

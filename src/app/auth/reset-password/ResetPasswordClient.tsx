@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { motion } from 'motion/react'
 import { createClient } from '@/lib/supabase/client'
@@ -12,23 +12,32 @@ export function ResetPasswordClient() {
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
   const [loading, setLoading] = useState(false)
-  const [exchanging, setExchanging] = useState(true)
+  const [ready, setReady] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [done, setDone] = useState(false)
+  const successRef = useRef(false)
+
+  // Sign out the recovery session if the user leaves without completing the update.
+  useEffect(() => {
+    return () => {
+      if (!successRef.current) {
+        createClient().auth.signOut()
+      }
+    }
+  }, [])
 
   useEffect(() => {
-    const code = searchParams.get('code')
-    if (!code) {
-      setError('Недействительная ссылка для сброса пароля.')
-      setExchanging(false)
+    if (searchParams.get('error')) {
+      setError('Ссылка устарела или уже использована. Запросите новую.')
       return
     }
     const supabase = createClient()
-    supabase.auth.exchangeCodeForSession(code).then(({ error: err }) => {
-      if (err) {
-        setError('Ссылка устарела или уже использована. Запросите новую.')
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        setReady(true)
+      } else {
+        setError('Сессия не найдена. Попробуйте запросить письмо повторно.')
       }
-      setExchanging(false)
     })
   }, [searchParams])
 
@@ -48,8 +57,13 @@ export function ResetPasswordClient() {
       const supabase = createClient()
       const { error: updateError } = await supabase.auth.updateUser({ password })
       if (updateError) {
-        setError(updateError.message)
+        setError(
+          updateError.message.toLowerCase().includes('different')
+            ? 'Новый пароль должен отличаться от предыдущего.'
+            : updateError.message,
+        )
       } else {
+        successRef.current = true
         setDone(true)
         setTimeout(() => router.push('/'), 2500)
       }
@@ -58,6 +72,95 @@ export function ResetPasswordClient() {
     } finally {
       setLoading(false)
     }
+  }
+
+  function renderContent() {
+    if (done) {
+      return (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="border border-[#00d9ff]/40 px-6 py-8 text-center space-y-4"
+        >
+          <p className="text-[#00d9ff] tracking-widest text-sm">ПАРОЛЬ ОБНОВЛЁН</p>
+          <p className="text-[#737373] text-sm">Перенаправляем на главную страницу…</p>
+        </motion.div>
+      )
+    }
+
+    if (!ready) {
+      if (error) {
+        return (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="border border-red-400/30 px-6 py-8 text-center space-y-4"
+          >
+            <p className="text-red-400 text-sm">{error}</p>
+            <button
+              onClick={() => router.push('/')}
+              className="text-xs text-[#737373] hover:text-[#00d9ff] transition-colors tracking-widest"
+            >
+              НА ГЛАВНУЮ
+            </button>
+          </motion.div>
+        )
+      }
+      return (
+        <div className="flex items-center justify-center py-12">
+          <div className="w-8 h-8 border-2 border-[#00d9ff] border-t-transparent rounded-full animate-spin" />
+        </div>
+      )
+    }
+
+    return (
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div>
+          <label className="block text-xs tracking-widest text-[#737373] mb-2">НОВЫЙ ПАРОЛЬ</label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            minLength={6}
+            className="w-full bg-transparent border-2 border-[#262626] px-4 py-3 focus:border-[#00d9ff] outline-none transition-colors"
+            placeholder="••••••••"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs tracking-widest text-[#737373] mb-2">ПОДТВЕРДИТЕ ПАРОЛЬ</label>
+          <input
+            type="password"
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+            required
+            className="w-full bg-transparent border-2 border-[#262626] px-4 py-3 focus:border-[#00d9ff] outline-none transition-colors"
+            placeholder="••••••••"
+          />
+        </div>
+
+        {error && (
+          <motion.p
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-sm text-red-400 border border-red-400/30 px-4 py-2"
+          >
+            {error}
+          </motion.p>
+        )}
+
+        <motion.button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-[#00d9ff] text-black py-4 tracking-widest text-sm hover:bg-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          whileHover={{ scale: loading ? 1 : 1.02 }}
+          whileTap={{ scale: loading ? 1 : 0.98 }}
+        >
+          {loading ? '...' : 'СОХРАНИТЬ ПАРОЛЬ'}
+        </motion.button>
+      </form>
+    )
   }
 
   return (
@@ -75,81 +178,7 @@ export function ResetPasswordClient() {
         </h2>
         <p className="text-sm text-[#737373] mb-8">Введите новый пароль для вашего аккаунта</p>
 
-        {exchanging ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="w-8 h-8 border-2 border-[#00d9ff] border-t-transparent rounded-full animate-spin" />
-          </div>
-        ) : done ? (
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="border border-[#00d9ff]/40 px-6 py-8 text-center space-y-4"
-          >
-            <p className="text-[#00d9ff] tracking-widest text-sm">ПАРОЛЬ ОБНОВЛЁН</p>
-            <p className="text-[#737373] text-sm">Перенаправляем на главную страницу…</p>
-          </motion.div>
-        ) : error && !password ? (
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="border border-red-400/30 px-6 py-8 text-center space-y-4"
-          >
-            <p className="text-red-400 text-sm">{error}</p>
-            <button
-              onClick={() => router.push('/')}
-              className="text-xs text-[#737373] hover:text-[#00d9ff] transition-colors tracking-widest"
-            >
-              НА ГЛАВНУЮ
-            </button>
-          </motion.div>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="block text-xs tracking-widest text-[#737373] mb-2">НОВЫЙ ПАРОЛЬ</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={6}
-                className="w-full bg-transparent border-2 border-[#262626] px-4 py-3 focus:border-[#00d9ff] outline-none transition-colors"
-                placeholder="••••••••"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs tracking-widest text-[#737373] mb-2">ПОДТВЕРДИТЕ ПАРОЛЬ</label>
-              <input
-                type="password"
-                value={confirm}
-                onChange={(e) => setConfirm(e.target.value)}
-                required
-                className="w-full bg-transparent border-2 border-[#262626] px-4 py-3 focus:border-[#00d9ff] outline-none transition-colors"
-                placeholder="••••••••"
-              />
-            </div>
-
-            {error && (
-              <motion.p
-                initial={{ opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-sm text-red-400 border border-red-400/30 px-4 py-2"
-              >
-                {error}
-              </motion.p>
-            )}
-
-            <motion.button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-[#00d9ff] text-black py-4 tracking-widest text-sm hover:bg-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              whileHover={{ scale: loading ? 1 : 1.02 }}
-              whileTap={{ scale: loading ? 1 : 0.98 }}
-            >
-              {loading ? '...' : 'СОХРАНИТЬ ПАРОЛЬ'}
-            </motion.button>
-          </form>
-        )}
+        {renderContent()}
       </motion.div>
     </div>
   )
