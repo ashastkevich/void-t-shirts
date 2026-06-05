@@ -55,9 +55,14 @@ export function ProductForm({ mode, defaultValues }: ProductFormProps) {
       const fd = new FormData()
       files.forEach((f) => fd.append('files', f))
       const res = await fetch('/api/admin/upload', { method: 'POST', body: fd })
-      const json = await res.json()
+      let json: { urls?: string[]; error?: string } = {}
+      try {
+        json = await res.json()
+      } catch {
+        throw new Error(`Server error (HTTP ${res.status})`)
+      }
       if (!res.ok) throw new Error(json.error ?? 'Upload failed')
-      setImages((prev) => [...prev, ...json.urls])
+      setImages((prev) => [...prev, ...(json.urls ?? [])])
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Upload failed')
     } finally {

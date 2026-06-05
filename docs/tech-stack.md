@@ -65,11 +65,20 @@ All product images use `fill` layout with appropriate `sizes` hints:
 | Robots | `app/robots.ts` → `/robots.txt` |
 | `metadataBase` | Set in `app/layout.tsx` for absolute OG image URL resolution |
 
+## Testing
+
+| Technology | Version | Role |
+|---|---|---|
+| [Vitest](https://vitest.dev) | 3.x | Unit and component test runner |
+| [React Testing Library](https://testing-library.com/react) | — | Component rendering and user-event simulation |
+| [Playwright](https://playwright.dev) | — | End-to-end browser automation |
+
 ## Deployment
 
 | Service | Role |
 |---|---|
 | [Vercel](https://vercel.com) | Hosting — automatic deploys from GitHub, edge CDN |
+| [Supabase Storage](https://supabase.com/storage) | Product image hosting (public bucket `products`) |
 | [GitHub](https://github.com) | Source control, CI trigger |
 
 Vercel runs `npm install` (which triggers `postinstall: prisma generate`) followed by `next build` on every push to `main`.

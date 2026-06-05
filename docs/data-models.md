@@ -18,7 +18,8 @@ model Product {
   series      String
   price       Int                   // stored in kopecks: 12 900 ₽ = 1 290 000
   description String
-  imageUrl    String
+  imageUrl    String                // primary image (first element of images[])
+  images      String[]              // all product images (Supabase Storage public URLs)
   weight      Int?                  // fabric weight in g/m²
   createdAt   DateTime    @default(now())
   orderItems  OrderItem[]
@@ -33,7 +34,8 @@ model Product {
 | `series` | String | Collection name shown as badge, e.g. `SIGNATURE` |
 | `price` | Int | **Stored in kopecks** to avoid float precision issues. Divide by 100 for rubles |
 | `description` | String | Short spec string, e.g. `100% органический хлопок • 220 г/м²` |
-| `imageUrl` | String | Full URL (currently Unsplash) |
+| `imageUrl` | String | Primary image URL — always equals `images[0]` |
+| `images` | String[] | All uploaded image URLs (Supabase Storage, bucket `products`) |
 | `weight` | Int? | Fabric weight in g/m², optional |
 
 **Price encoding example:**
@@ -65,6 +67,13 @@ model User {
 
 Auth is handled entirely by Supabase Auth. This table stores additional profile data and is the foreign key target for orders.
 
+**Admin role:** Stored in Supabase Auth `app_metadata.role = 'admin'`, not in this table. Set via Supabase SQL editor (one-time per admin user):
+```sql
+UPDATE auth.users
+SET raw_app_meta_data = raw_app_meta_data || '{"role": "admin"}'::jsonb
+WHERE email = 'admin@example.com';
+```
+
 ---
 
 ## Order
@@ -73,13 +82,17 @@ Represents a placed order.
 
 ```prisma
 model Order {
-  id        String      @id @default(uuid())
-  userId    String
-  user      User        @relation(fields: [userId], references: [id])
-  status    String      @default("pending")
-  total     Int                   // in kopecks, sum of all OrderItems
-  createdAt DateTime    @default(now())
-  items     OrderItem[]
+  id            String      @id @default(uuid())
+  userId        String
+  user          User        @relation(fields: [userId], references: [id])
+  status        String      @default("pending")
+  total         Int                   // in kopecks, sum of all OrderItems
+  createdAt     DateTime    @default(now())
+  items         OrderItem[]
+  recipientName String?               // delivery recipient name
+  phone         String?               // recipient phone
+  city          String?               // delivery city
+  address       String?               // street address
 }
 ```
 

@@ -64,7 +64,7 @@ Slide-in panel from the right. Reads items and `removeItem` directly from Zustan
 | `onClose` | `() => void` |
 | `onSwitchToRegister` | `() => void` |
 
-Controlled form with `email` + `password` state. Calls `supabase.auth.signInWithPassword()`. Shows inline error on failure, calls `onClose()` on success.
+Controlled form with `email` + `password` state. Calls `supabase.auth.signInWithPassword()`. Shows inline error on failure, calls `onClose()` on success. Includes a "Forgot password?" link that calls `supabase.auth.resetPasswordForEmail()` and shows a confirmation message.
 
 ### RegisterModal — `src/components/auth/RegisterModal.tsx`
 
@@ -75,6 +75,12 @@ Controlled form with `email` + `password` state. Calls `supabase.auth.signInWith
 | `onSwitchToLogin` | `() => void` |
 
 Controlled form with `name`, `email`, `password`, `confirm` state. Validates password match client-side. Calls `supabase.auth.signUp()`. On success, switches to a "check your email" confirmation screen instead of closing.
+
+### ResetPasswordClient — `src/app/auth/reset-password/ResetPasswordClient.tsx`
+
+Full-page password-reset form. Reached after the user clicks the Supabase-sent email link, which goes through `/auth/callback` to exchange the code for a recovery session.
+
+States: loading spinner (checking session) → form (ready) → success screen (done) → error screen (bad/expired link). On success, signs out the recovery session, marks `successRef = true` (cleanup effect skips sign-out), and redirects to `/` after 2.5 s.
 
 ---
 
@@ -116,6 +122,33 @@ Standalone product detail as a full page (used by the `/products/[slug]` SSG rou
 
 ---
 
+## Admin Components
+
+### AdminSidebar — `src/components/admin/AdminSidebar.tsx`
+
+Left navigation sidebar rendered by `app/admin/layout.tsx`. Uses `usePathname()` to highlight the active link. Links: Товары (`/admin`) and Добавить (`/admin/products/new`). Footer link returns to the storefront.
+
+### ProductForm — `src/components/admin/ProductForm.tsx`
+
+Shared create/edit form used by both `/admin/products/new` and `/admin/products/[id]/edit`.
+
+| Prop | Type | Purpose |
+|---|---|---|
+| `mode` | `'create' \| 'edit'` | Controls submit action and button label |
+| `defaultValues` | object | Pre-fills fields in edit mode |
+
+**Image upload flow:** File input → `POST /api/admin/upload` → receives public URLs → stored in local `images[]` state → passed to Server Action as comma-separated string. The first image becomes `imageUrl` (primary). Thumbnail grid with individual remove buttons; first image is labelled "главное".
+
+**Slug auto-generation:** In create mode, slug is derived from name in real time via `toSlug()`. In edit mode it is editable but not auto-generated.
+
+**Submit:** Calls `createProduct(fd)` or `updateProduct(id, fd)` Server Actions via `useTransition`. Server Actions redirect to `/admin` on success and call `revalidatePath` for `/`, `/admin`, and the product's `/products/[slug]` page.
+
+### DeleteButton — `src/app/admin/DeleteButton.tsx`
+
+Inline two-step confirmation button. First click shows "Удалить «name»? Да / Нет". "Да" calls the `deleteProduct(id)` Server Action via `useTransition` with a loading spinner.
+
+---
+
 ## UI Components
 
 ### AnimatedBackground — `src/components/ui/AnimatedBackground.tsx`
@@ -149,4 +182,15 @@ page.tsx (RSC)
         │     └── next/image (thumbnails)
         ├── LoginModal
         └── RegisterModal
+
+app/admin/layout.tsx (RSC — isAdmin guard)
+  └── AdminSidebar (client)
+  └── [page content]
+        ├── admin/page.tsx → product table + DeleteButton
+        ├── admin/products/new/page.tsx → ProductForm mode="create"
+        └── admin/products/[id]/edit/page.tsx → ProductForm mode="edit"
+
+app/auth/reset-password/page.tsx (RSC)
+  └── ResetPasswordClient (client)
+        └── AnimatedBackground
 ```

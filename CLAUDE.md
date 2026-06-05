@@ -11,6 +11,11 @@ npm run build      # production build
 npm run db:push    # push Prisma schema to Supabase (requires .env.local with DATABASE_URL)
 npm run db:seed    # seed 6 products into the DB
 npm run db:studio  # open Prisma Studio
+npm test           # run all unit + component tests (Vitest, no server needed)
+npm run test:watch # Vitest in watch mode
+npm run test:coverage # coverage report (src/lib/ and src/store/ target ≥ 90%)
+npm run test:e2e   # run Playwright E2E tests (auto-starts dev server)
+npm run test:e2e:ui # Playwright with interactive UI
 ```
 
 ## Architecture
@@ -78,3 +83,42 @@ middleware.ts    ← Supabase session refresh on every non-static request
 **Prices** are stored in the DB as integers in kopecks (12900 ₽ → `1290000`). The `dbRowToProduct()` function in `lib/products.ts` converts back to the formatted string. The static fallback uses pre-formatted strings.
 
 **Unused packages:** A large set of Radix UI and shadcn-style components is installed but not yet used in the current UI. They are available for future features (e.g., checkout form, order history).
+
+## Testing
+
+**Stack:** Vitest + React Testing Library (unit/component), Playwright (E2E).
+
+**Test layout:**
+```
+src/
+  store/cart.test.ts                        ← Zustand store logic
+  lib/
+    products.test.ts                        ← price conversion, DB fallback
+    orders.test.ts                          ← total calculation, order structure
+    admin.test.ts                           ← isAdmin() role check
+    actions/products.test.ts                ← slug generation, price×100, auth guard
+  components/
+    layout/CartDrawer.test.tsx
+    layout/Header.test.tsx
+    auth/LoginModal.test.tsx
+    auth/RegisterModal.test.tsx
+    product/ProductDetailModal.test.tsx
+    admin/ProductForm.test.tsx
+    admin/AdminSidebar.test.tsx
+  app/admin/DeleteButton.test.tsx
+  app/api/admin/upload/route.test.ts        ← 401/400/500, filename, extension
+middleware.test.ts                          ← /admin redirect for non-admin
+tests/e2e/
+  home.spec.ts, cart.spec.ts, auth.spec.ts
+  product-page.spec.ts, checkout.spec.ts, admin.spec.ts
+```
+
+**Key mocking conventions:**
+- Prisma (`./db`) is always mocked — tests never touch the DB.
+- Supabase client (`@/lib/supabase/client`, `@/lib/supabase/server`) is mocked per test file.
+- `motion/react` is globally mocked in `vitest.setup.ts` — `AnimatePresence` renders children directly, `motion.*` renders plain HTML tags (no animations in tests).
+- `next/image` → plain `<img>`, `next/link` → plain `<a>`, `next/navigation` → `vi.fn()` stubs.
+- E2E tests live in `tests/e2e/` and are excluded from the Vitest run (`vitest.config.ts` exclude list).
+
+**E2E environment variables:**
+- `ADMIN_EMAIL` / `ADMIN_PASSWORD` — required to run the authenticated admin tests; without them those tests are skipped automatically.

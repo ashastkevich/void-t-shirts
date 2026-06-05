@@ -19,9 +19,11 @@ The visual identity is built around a pure black (`#000`) canvas with a single a
 | User login / logout | ✅ |
 | Product detail modal + standalone page | ✅ |
 | Size selection | ✅ |
-| Order placement | 🔜 (Phase 9) |
+| Password reset via email | ✅ |
+| Admin panel (product CRUD) | ✅ |
+| Image upload to Supabase Storage | ✅ |
+| Order placement | 🔜 |
 | Order history | 🔜 |
-| Admin panel | 🔜 |
 
 ## Product Catalogue
 
